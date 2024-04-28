@@ -10,7 +10,7 @@ int main(int arg_count, char* args[])
     if (arg_count == 2)
     {
         const char* input = args[1];
-        if (strcmp(input, "--help"))
+        if (strcmp(input, "--help") == 0)
         {
             print_usage();
             return EXIT_SUCCESS;
