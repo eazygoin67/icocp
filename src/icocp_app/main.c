@@ -5,14 +5,8 @@ static void print_usage();
 
 int main(int arg_count, char* args[])
 {
-    printf("icocp\n");
+    printf("--- IcoCP - Png to Ico Converter --- \n\n");
 
-    if (arg_count <= 1)
-    {
-        print_usage();
-        return EXIT_FAILURE;
-    }
-     
     if (arg_count == 2)
     {
         const char* input = args[1];
@@ -25,20 +19,54 @@ int main(int arg_count, char* args[])
 
     if (arg_count >= 3)
     {
-        const char* const input_filename = args[1];
-        const char* const output_filename = args[2];
-        
+        const char* input_filename = NULL;
+        const char* output_filename = NULL;
         icocp_conv_params_t params = { 0 };
-        for (int i = 3; i < arg_count; ++i)
+
+        for (int i = 1; i < arg_count; ++i)
         {
-            const char *arg = args[i];
-            
-            if (str_starts_with(arg, "--max_images="))
+            const char* arg = args[i];
+            if (strcmp(arg, "--input") == 0 || strcmp(arg, "--output") == 0)
+            {
+                const char** filename_result = (arg[2] == 'o') ? &output_filename : &input_filename;
+                if (i >= (arg_count - 1))
+                {
+                    printf("Error: Expect filename after parameter \"%s\"\n", arg);
+                    return EXIT_FAILURE;
+                }
+
+                const char* filename_arg = args[++i];
+                if (filename_arg == NULL || *filename_arg == 0)
+                {
+                    printf("Error: Invalid filename specified after \"%s\"\n", arg);
+                    return EXIT_FAILURE;
+                }
+
+                *filename_result = filename_arg;
+            }
+            else if (str_starts_with(arg, "--max_images="))
             {
                 params.max_images = strtol(arg + 13, NULL, 10);
             }
+            else
+            {
+                printf("Warning: Unknown parameter \"%s\" - skipping...\n", arg);
+            }
         }
-        
+
+        if (!input_filename)
+        {
+            printf("Error: No input filename specified\n");
+            return EXIT_FAILURE;
+        }
+
+        if (!output_filename)
+        {
+            printf("Error: No output filename specified\n");
+            return EXIT_FAILURE;
+        }
+
+        printf("Converting file \"%s\" to icon file \"%s\" ... \n", input_filename, output_filename);
         const icocp_err_t result = icocp_convert_image_file_to_icon(
             input_filename,
             output_filename,
@@ -88,6 +116,7 @@ int main(int arg_count, char* args[])
         return (result == icocp_err_success) ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
+    printf("Error: Invalid input. Use command \"icocp --help\" for usage.\n");
     return EXIT_FAILURE;
 }
 
@@ -99,13 +128,12 @@ static bool str_starts_with(const char* str, const char* starts_width)
 
 static void print_usage()
 {
-    printf("--- IcoCP - Png to Ico Converter --- \n\n");
     printf("Usage:\n");
 
     printf("    icoCP --help :: Print help text\n\n");
 
-    printf("    icocp /image/to/convert.png icon/output/file.ico --max_images=n :: Convert a image file to an icon\n");
-    printf("        --max_images=n :: limits the number of sub images created to n where n > 1\n\n");
-
-    //printf("    icocp /some/icon/file.ico :: Outputs basic information on the icon file\n");
+    printf("    icocp --input /image/to/convert.png --output icon/output/file.ico --max_images=n :: Convert a image file to an icon\n");
+    printf("        --input :: specifies that the next parameter will be the input file. Supports png, bmp and tga.\n");
+    printf("        --output :: specifies that the next parameter will be the output file. Expects a .ico file.\n");
+    printf("        --max_images=n :: (OPTIONAL) limits the number of sub images created to n where n > 1\n\n");
 }
