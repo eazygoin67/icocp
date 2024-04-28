@@ -74,7 +74,7 @@ typedef struct icocp_icon_body_data_t
 } icocp_icon_body_data_t;
 static void icocp_write_png_data_callback(void* userdata, void* data, int size);
 
-static const int32_t k_icon_target_sizes[ICOCP_MAX_ICON_SUBIMAGES] = { 16, 32, 64, 256 };
+static const int32_t k_icon_target_sizes[ICOCP_MAX_ICON_SUBIMAGES] = { 16, 32, 48, 256 };
 
 __forceinline static bool common_file_write_i8(FILE*  file,  int8_t val)  { return (fwrite(&val, sizeof(val), 1, file) == sizeof(val)); }
 __forceinline static bool common_file_write_i16(FILE* file,  int16_t val) { return (fwrite(&val, sizeof(val), 1, file) == sizeof(val)); }
