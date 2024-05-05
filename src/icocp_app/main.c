@@ -102,7 +102,8 @@ int main(int arg_count, char* args[])
             case icocp_err_invalid_image_data: 
             {
                 printf("Error: Invalid image - expected RGB/RGBA input "
-                       "image of size 256x256, 48x48, 32x32 or 16x16\n");
+                       "image of size that is square and at least 16x16 "
+                       "pixels in size\n");
             }
             break;
 

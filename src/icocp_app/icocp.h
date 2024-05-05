@@ -8,7 +8,7 @@
 #include <string.h>
 #include <math.h>
 
-#define ICOCP_MAX_ICON_SUBIMAGES 4
+#define ICOCP_MAX_ICON_SUBIMAGES 7
 
 typedef enum icocp_err_t
 {
