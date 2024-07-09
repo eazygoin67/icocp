@@ -151,5 +151,11 @@ static void print_usage()
     printf("    icocp --input /image/to/convert.png --output icon/output/file.ico --max_images=n :: Convert a image file to an icon\n");
     printf("        --input :: specifies that the next parameter will be the input file. Supports png, bmp and tga.\n");
     printf("        --output :: specifies that the next parameter will be the output file. Expects a .ico file.\n");
-    printf("        --max_images=n :: (OPTIONAL) limits the number of sub images created to n where n > 1\n\n");
+    printf("        --max_images=n :: (OPTIONAL) limits the number of sub images created to n where n > 1\n");
+    printf("        --filtering=op :: (OPTIONAL) specifies filtering when doing downsampling between subimages sizes. Possible values:\n");
+    printf("                    Point - Simple point sampling\n");
+    printf("                    Bilinear - Simple bilinear sampling\n");
+    printf("                    Point - An interpolating cubic spline\n");
+
+    printf("\n");
 }
