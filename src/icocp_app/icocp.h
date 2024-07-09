@@ -10,6 +10,14 @@
 
 #define ICOCP_MAX_ICON_SUBIMAGES 7
 
+typedef enum icocp_filtering_t
+{
+    icocp_filtering_point,
+    icocp_filtering_bilinear,
+    icocp_filtering_catmullrom,
+
+} icocp_filtering_t;
+
 typedef enum icocp_err_t
 {
     icocp_err_success,
@@ -25,6 +33,7 @@ typedef enum icocp_err_t
 typedef struct icocp_conv_params_t
 {
     int32_t max_images;
+    icocp_filtering_t filtering;
 
 } icocp_conv_params_t;
 

@@ -85,6 +85,19 @@ __forceinline static bool common_file_write_u16(FILE* file, uint16_t val) { retu
 __forceinline static bool common_file_write_u32(FILE* file, uint32_t val) { return (fwrite(&val, sizeof(val), 1, file) == sizeof(val)); }
 __forceinline static bool common_file_write_u64(FILE* file, uint64_t val) { return (fwrite(&val, sizeof(val), 1, file) == sizeof(val)); }
 
+__forceinline static stbir_filter icocp_get_stbir_filter_from_icocp_filter(icocp_filtering_t filtering)
+{
+    switch (filtering)
+    {
+        case icocp_filtering_point: return STBIR_FILTER_POINT_SAMPLE;
+        case icocp_filtering_bilinear: return STBIR_FILTER_TRIANGLE;
+        case icocp_filtering_catmullrom: return STBIR_FILTER_CATMULLROM;
+    }
+
+    // Point sampling is often a nice default at common icon sizes
+    return STBIR_FILTER_POINT_SAMPLE; 
+}
+
 icocp_err_t icocp_convert_image_file_to_icon(
     const char* input_filename,
     const char* output_filename,
@@ -178,11 +191,15 @@ icocp_err_t icocp_convert_image_data_to_icon(
 
                     if (width != target_size)
                     {
+                        const stbir_filter filtering = icocp_get_stbir_filter_from_icocp_filter(
+                            (params != NULL) ? params->filtering : icocp_filtering_point
+                        );
+
                         buffer = (uint8_t *)malloc(target_size * target_size * color_channels);
                         buffer = stbir_resize(
                             image_data, width, height, width * color_channels,
                             buffer, target_size, target_size, target_size * color_channels,
-                            STBIR_ARGB, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, STBIR_FILTER_CUBICBSPLINE
+                            STBIR_ARGB, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, filtering
                         );
 
                         was_resized = true;

@@ -48,6 +48,21 @@ int main(int arg_count, char* args[])
             {
                 params.max_images = strtol(arg + 13, NULL, 10);
             }
+            else if (str_starts_with(arg, "--filtering="))
+            {
+                const int32_t k_param_check_offset = sizeof("--filtering=") - 1;
+                switch (arg[k_param_check_offset])
+                {
+                    case 'p':
+                    case 'P': { params.filtering = icocp_filtering_point; } break;
+
+                    case 'b':
+                    case 'B': { params.filtering = icocp_filtering_bilinear; } break;
+
+                    case 'c':
+                    case 'C': { params.filtering = icocp_filtering_catmullrom; } break;
+                }
+            }
             else
             {
                 printf("Warning: Unknown parameter \"%s\" - skipping...\n", arg);
