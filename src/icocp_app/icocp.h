@@ -35,6 +35,10 @@ typedef struct icocp_conv_params_t
     int32_t max_images;
     icocp_filtering_t filtering;
 
+    bool as_cursor;
+    int32_t cursor_hotspot_x;
+    int32_t cursor_hotspot_y;
+
 } icocp_conv_params_t;
 
 typedef struct icocp_loaded_image_data_t

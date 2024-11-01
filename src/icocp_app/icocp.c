@@ -151,17 +151,20 @@ icocp_err_t icocp_convert_image_data_to_icon(
     if (image_data)
     {
         int32_t target_size_index = -1;
-        if (width == height && color_channels == 4)
+        if (width == height)
         {
-            target_size_index = (int32_t)ICOCP_MAX_ICON_SUBIMAGES - 1;
-            while (target_size_index >= 0)
+            if (color_channels == 3 || color_channels == 4)
             {
-                if (k_icon_target_sizes[target_size_index] <= width)
+                target_size_index = (int32_t)ICOCP_MAX_ICON_SUBIMAGES - 1;
+                while (target_size_index >= 0)
                 {
-                    break;
-                }
+                    if (k_icon_target_sizes[target_size_index] <= width)
+                    {
+                        break;
+                    }
 
-                --target_size_index;
+                    --target_size_index;
+                }
             }
         }
         
@@ -195,11 +198,13 @@ icocp_err_t icocp_convert_image_data_to_icon(
                             (params != NULL) ? params->filtering : icocp_filtering_point
                         );
 
+                        const int32_t color_format = (color_channels == 3) ? STBIR_RGB : STBIR_RGBA;
+
                         buffer = (uint8_t *)malloc(target_size * target_size * color_channels);
                         buffer = stbir_resize(
                             image_data, width, height, width * color_channels,
                             buffer, target_size, target_size, target_size * color_channels,
-                            STBIR_ARGB, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, filtering
+                            color_format, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, filtering
                         );
 
                         was_resized = true;
@@ -230,7 +235,7 @@ icocp_err_t icocp_convert_image_data_to_icon(
 
                     // Write ICO Header (6 bytes)
                     common_file_write_u16(output_file, 0); // Two reserved bytes - always 0
-                    common_file_write_u16(output_file, 1); // 2 byte value - 1 for icon, 2 for cursor
+                    common_file_write_u16(output_file, (params && params->as_cursor) ? 2 : 1); // 2 byte value - 1 for icon, 2 for cursor
                     common_file_write_u16(output_file, (uint16_t)body_data.png_data_count); // 2 byte value - number of images
 
                     // Write ICONDIRENTRY headers for each subimage (16 bytes each)
@@ -241,17 +246,38 @@ icocp_err_t icocp_convert_image_data_to_icon(
                                 ? 0 
                                 : (uint8_t)k_icon_target_sizes[target_size_index - i];
 
-                        common_file_write_u8(output_file, image_size); // width - 0 means 256
-                        common_file_write_u8(output_file, image_size); // height - 0 means 256
-                        common_file_write_u8(output_file, 0); // color palette
-                        common_file_write_u8(output_file, 0); // reserved
-                        common_file_write_u16(output_file, 0); // color planes
-                        common_file_write_u16(output_file, 32); // bits per pixel
-                        common_file_write_u32(output_file, (uint32_t)body_data.png_data_size[i]); // size of png
+                        // width - 0 means 256
+                        common_file_write_u8(output_file, image_size); 
+
+                        // height - 0 means 256
+                        common_file_write_u8(output_file, image_size); 
+                        
+                        // color palette
+                        common_file_write_u8(output_file, 0); 
+
+                        // reserved - expected 0
+                        common_file_write_u8(output_file, 0); 
+
+                        // color planes or x hotspot for cursors
+                        common_file_write_u16(
+                            output_file, 
+                            (params && params->as_cursor) ? (uint16_t)params->cursor_hotspot_x : 0
+                        ); 
+
+                        // bits per pixel or y hotspot for cursors
+                        common_file_write_u16(
+                            output_file, 
+                            (params && params->as_cursor) ? (uint16_t)params->cursor_hotspot_y : 32
+                        ); 
+                        
+                        // size of png
+                        common_file_write_u32(output_file, (uint32_t)body_data.png_data_size[i]); 
+
+                        // offset
                         common_file_write_u32(
                             output_file, 
                             (uint32_t)body_data.png_data_offset[i] + size_of_header_data
-                        ); // offset
+                        ); 
                     }
 
                     for (uint16_t i = 0; i < body_data.png_data_count; ++i)

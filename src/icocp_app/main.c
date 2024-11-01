@@ -63,6 +63,26 @@ int main(int arg_count, char* args[])
                     case 'C': { params.filtering = icocp_filtering_catmullrom; } break;
                 }
             }
+            else if (strcmp(arg, "--cursor") == 0)
+            {
+                params.as_cursor = true;
+            }
+            else if (str_starts_with(arg, "--hotspot="))
+            {
+                const char *value_str = arg + sizeof("--hotspot=") - 1;
+                const char* next = NULL;
+                int32_t x = 0, y = 0;
+
+                x = strtol(value_str, &next, 10);
+                if (next && (*next == 'x' || *next == ','))
+                {
+                    ++next;
+                    y = strtol(next, NULL, 10);
+                }
+
+                params.cursor_hotspot_x = x;
+                params.cursor_hotspot_y = y;
+            }
             else
             {
                 printf("Warning: Unknown parameter \"%s\" - skipping...\n", arg);
@@ -148,14 +168,16 @@ static void print_usage()
 
     printf("    icoCP --help :: Print help text\n\n");
 
-    printf("    icocp --input /image/to/convert.png --output icon/output/file.ico --max_images=n :: Convert a image file to an icon\n");
+    printf("    icocp --input /image/to/convert.png --output icon/output/file.ico --max_images=n :: Convert a image file to an icon.\n");
     printf("        --input :: specifies that the next parameter will be the input file. Supports png, bmp and tga.\n");
     printf("        --output :: specifies that the next parameter will be the output file. Expects a .ico file.\n");
-    printf("        --max_images=n :: (OPTIONAL) limits the number of sub images created to n where n > 1\n");
+    printf("        --max_images=n :: (OPTIONAL) limits the number of sub images created to n where n > 1.\n");
     printf("        --filtering=op :: (OPTIONAL) specifies filtering when doing downsampling between subimages sizes. Possible values:\n");
     printf("                    Point - Simple point sampling\n");
     printf("                    Bilinear - Simple bilinear sampling\n");
     printf("                    Point - An interpolating cubic spline\n");
+    printf("        --cursor :: (OPTIONAL) Exports the icon as in a cursor format instead. Generally uses the .cur extension.\n");
+    printf("        --hotspot=x,y :: (OPTIONAL) Specifies the cursor hotspot value.\n");
 
     printf("\n");
 }
